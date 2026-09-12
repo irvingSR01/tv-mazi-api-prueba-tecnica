@@ -1,11 +1,14 @@
 package com.irvingSR01.tv_maze_api.service;
 
 import com.irvingSR01.tv_maze_api.client.TvMazeClient;
+import com.irvingSR01.tv_maze_api.document.CommentDocument;
 import com.irvingSR01.tv_maze_api.document.ShowDocument;
 import com.irvingSR01.tv_maze_api.mapper.ShowMapper;
+import com.irvingSR01.tv_maze_api.model.CommentResponse;
 import com.irvingSR01.tv_maze_api.model.ShowResponse;
 import com.irvingSR01.tv_maze_api.model.TvMazeSearchResponse;
 import com.irvingSR01.tv_maze_api.model.TvMazeShow;
+import com.irvingSR01.tv_maze_api.repository.CommentRepository;
 import com.irvingSR01.tv_maze_api.repository.ShowRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -25,6 +28,7 @@ public class ShowServiceImpl implements ShowService {
 
     private final TvMazeClient tvMazeClient;
     private final ShowRepository showRepository;
+    private final CommentRepository commentRepository;
 
     @Override
     public List<ShowResponse> searchShows(String query) {
@@ -75,8 +79,24 @@ public class ShowServiceImpl implements ShowService {
                 show.name(),
                 resolveChannelName(show),
                 show.summary(),
-                show.genres()
+                show.genres(),
+                findCommentsForShow(show.id())
         );
+    }
+
+    private List<CommentResponse> findCommentsForShow(Integer showId) {
+        try {
+            return commentRepository.findByShowId(showId).stream()
+                    .map(this::mapToCommentResponse)
+                    .collect(Collectors.toList());
+        } catch (DataAccessException e) {
+            log.error("Could not fetch comments for showId={}: {}", showId, e.getMessage());
+            return Collections.emptyList();
+        }
+    }
+
+    private CommentResponse mapToCommentResponse(CommentDocument document) {
+        return new CommentResponse(document.comment(), document.rating());
     }
 
     private String resolveChannelName(TvMazeShow show) {
