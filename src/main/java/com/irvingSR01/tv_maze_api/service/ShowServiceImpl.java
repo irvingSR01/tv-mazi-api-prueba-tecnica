@@ -1,35 +1,30 @@
 package com.irvingSR01.tv_maze_api.service;
 
+import com.irvingSR01.tv_maze_api.client.TvMazeClient;
 import com.irvingSR01.tv_maze_api.model.ShowResponse;
 import com.irvingSR01.tv_maze_api.model.TvMazeSearchResponse;
 import com.irvingSR01.tv_maze_api.model.TvMazeShow;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
-import org.springframework.web.client.RestTemplate;
 
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
-import java.util.Map;
 import java.util.stream.Collectors;
 
 @Slf4j
 @Service
 @RequiredArgsConstructor
 public class ShowServiceImpl implements ShowService {
-    private final RestTemplate restTemplate;
 
-    @Value("${tvmaze.api.base-url}")
-    private String baseUrl;
+    private final TvMazeClient tvMazeClient;
 
     @Override
     public List<ShowResponse> searchShows(String query) {
-        String url = this.baseUrl + "/search/shows?q=" + query;
-        log.info("Searching on url={}", url);
+        log.info("Searching shows with query={}", query);
 
-        TvMazeSearchResponse[] response = restTemplate.getForObject(url, TvMazeSearchResponse[].class);
+        TvMazeSearchResponse[] response = tvMazeClient.search(query);
 
         if (response == null) {
             return Collections.emptyList();
@@ -41,11 +36,9 @@ public class ShowServiceImpl implements ShowService {
     }
 
     @Override
-    public Map<String, Object> getShowById(Integer id) {
-        String url = this.baseUrl + "/shows/" + id;
-        log.info("Searching by id on url={}", url);
-
-        return restTemplate.getForObject(url, Map.class);
+    public TvMazeShow getShowById(Integer id) {
+        log.info("Fetching show by id={}", id);
+        return tvMazeClient.getShowById(id);
     }
 
     private ShowResponse mapToResponse(TvMazeSearchResponse response) {
