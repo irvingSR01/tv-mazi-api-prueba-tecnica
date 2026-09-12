@@ -1,11 +1,16 @@
 package com.irvingSR01.tv_maze_api.service;
 
 import com.irvingSR01.tv_maze_api.client.TvMazeClient;
+import com.irvingSR01.tv_maze_api.document.ShowDocument;
+import com.irvingSR01.tv_maze_api.mapper.ShowMapper;
 import com.irvingSR01.tv_maze_api.model.ShowResponse;
 import com.irvingSR01.tv_maze_api.model.TvMazeSearchResponse;
 import com.irvingSR01.tv_maze_api.model.TvMazeShow;
+import com.irvingSR01.tv_maze_api.repository.ShowRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.dao.DataAccessException;
+import org.springframework.dao.DuplicateKeyException;
 import org.springframework.stereotype.Service;
 
 import java.util.Arrays;
@@ -19,6 +24,7 @@ import java.util.stream.Collectors;
 public class ShowServiceImpl implements ShowService {
 
     private final TvMazeClient tvMazeClient;
+    private final ShowRepository showRepository;
 
     @Override
     public List<ShowResponse> searchShows(String query) {
@@ -37,8 +43,28 @@ public class ShowServiceImpl implements ShowService {
 
     @Override
     public TvMazeShow getShowById(Integer id) {
-        log.info("Fetching show by id={}", id);
-        return tvMazeClient.getShowById(id);
+        return showRepository.findById(id)
+                .map(document -> {
+                    log.info("Show id={} found in cache", id);
+                    return ShowMapper.toApiModel(document);
+                })
+                .orElseGet(() -> fetchAndCacheShow(id));
+    }
+
+    private TvMazeShow fetchAndCacheShow(Integer id) {
+        log.info("Show id={} not in cache, fetching from TV Maze API", id);
+
+        TvMazeShow show = tvMazeClient.getShowById(id);
+
+        try {
+            showRepository.save(ShowMapper.toDocument(show));
+        } catch (DuplicateKeyException e) {
+            log.warn("Show id={} was cached by a concurrent request, ignoring duplicate save", id);
+        } catch (DataAccessException e) {
+            log.error("Could not cache show id={}: {}", id, e.getMessage());
+        }
+
+        return show;
     }
 
     private ShowResponse mapToResponse(TvMazeSearchResponse response) {
