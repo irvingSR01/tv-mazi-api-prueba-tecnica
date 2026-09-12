@@ -29,5 +29,5 @@ mvn test
 Para levantar la aplicacion localmente, utiliza el siguiente comando en la raiz del proyecto:
 
 ```Bash
-mvn spring-boot:run
+.\mvnw spring-boot:run
 ```
