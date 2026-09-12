@@ -1,3 +1,6 @@
 spring:
   application:
     name: tv-maze-api
+tvmaze:
+  api:
+    base-url: "https://api.tvmaze.com"
