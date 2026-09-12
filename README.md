@@ -23,3 +23,11 @@ Para ejecutar todas las pruebas automatizadas y verificar la integridad del codi
 
 ```bash
 mvn test
+```
+
+## Ejecucion Local
+Para levantar la aplicacion localmente, utiliza el siguiente comando en la raiz del proyecto:
+
+```Bash
+mvn spring-boot:run
+```
