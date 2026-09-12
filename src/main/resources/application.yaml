@@ -1,6 +1,9 @@
 spring:
   application:
     name: tv-maze-api
+  data:
+    mongodb:
+      uri: mongodb+srv://kairos_db:nM2rRIWuIipNdWKn@kairos-prueba.70ucjcq.mongodb.net/?appName=kairos-prueba
 tvmaze:
   api:
     base-url: "https://api.tvmaze.com"
