@@ -12,6 +12,7 @@ import org.springframework.web.client.RestTemplate;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -37,6 +38,14 @@ public class ShowServiceImpl implements ShowService {
         return Arrays.stream(response)
                 .map(this::mapToResponse)
                 .collect(Collectors.toList());
+    }
+
+    @Override
+    public Map<String, Object> getShowById(Integer id) {
+        String url = this.baseUrl + "/shows/" + id;
+        log.info("Searching by id on url={}", url);
+
+        return restTemplate.getForObject(url, Map.class);
     }
 
     private ShowResponse mapToResponse(TvMazeSearchResponse response) {

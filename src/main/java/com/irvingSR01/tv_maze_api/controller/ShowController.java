@@ -5,12 +5,10 @@ import com.irvingSR01.tv_maze_api.service.ShowService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Map;
 
 @Slf4j
 @RestController
@@ -28,5 +26,16 @@ public class ShowController {
         List<ShowResponse> shows = showService.searchShows(searchQuery);
 
         return ResponseEntity.ok(shows);
+    }
+
+    @GetMapping("/{id}")
+    public ResponseEntity<Map<String, Object>> getShowById (
+            @PathVariable("id") Integer id
+    ) {
+        log.info("Requesting get show by id {}", id);
+
+        Map<String, Object> show = showService.getShowById(id);
+
+        return ResponseEntity.ok(show);
     }
 }
