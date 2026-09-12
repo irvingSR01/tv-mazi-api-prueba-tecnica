@@ -1,5 +1,6 @@
 package com.irvingSR01.tv_maze_api.controller;
 
+import com.irvingSR01.tv_maze_api.model.ShowDetailResponse;
 import com.irvingSR01.tv_maze_api.model.ShowResponse;
 import com.irvingSR01.tv_maze_api.model.TvMazeShow;
 import com.irvingSR01.tv_maze_api.service.ShowService;
@@ -28,11 +29,11 @@ public class ShowController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<TvMazeShow> getShowById(
+    public ResponseEntity<ShowDetailResponse> getShowById(
             @PathVariable("id") Integer id
     ) {
         log.info("Requesting get show by id {}", id);
-        TvMazeShow show = showService.getShowById(id);
+        ShowDetailResponse show = showService.getShowById(id);
         return ResponseEntity.ok(show);
     }
 }

@@ -4,10 +4,7 @@ import com.irvingSR01.tv_maze_api.client.TvMazeClient;
 import com.irvingSR01.tv_maze_api.document.CommentDocument;
 import com.irvingSR01.tv_maze_api.document.ShowDocument;
 import com.irvingSR01.tv_maze_api.mapper.ShowMapper;
-import com.irvingSR01.tv_maze_api.model.CommentResponse;
-import com.irvingSR01.tv_maze_api.model.ShowResponse;
-import com.irvingSR01.tv_maze_api.model.TvMazeSearchResponse;
-import com.irvingSR01.tv_maze_api.model.TvMazeShow;
+import com.irvingSR01.tv_maze_api.model.*;
 import com.irvingSR01.tv_maze_api.repository.CommentRepository;
 import com.irvingSR01.tv_maze_api.repository.ShowRepository;
 import lombok.RequiredArgsConstructor;
@@ -46,13 +43,34 @@ public class ShowServiceImpl implements ShowService {
     }
 
     @Override
-    public TvMazeShow getShowById(Integer id) {
-        return showRepository.findById(id)
+    public ShowDetailResponse getShowById(Integer id) {
+        TvMazeShow show = showRepository.findById(id)
                 .map(document -> {
                     log.info("Show id={} found in cache", id);
                     return ShowMapper.toApiModel(document);
                 })
                 .orElseGet(() -> fetchAndCacheShow(id));
+
+        return buildDetailResponse(show);
+    }
+
+    private ShowDetailResponse buildDetailResponse(TvMazeShow show) {
+        return new ShowDetailResponse(
+                show.id(),
+                show.name(),
+                show.type(),
+                show.genres(),
+                show.status(),
+                show.runtime(),
+                show.premiered(),
+                show.ended(),
+                show.summary(),
+                show.rating(),
+                show.image(),
+                show.network(),
+                show.webChannel(),
+                findCommentsForShow(show.id())
+        );
     }
 
     private TvMazeShow fetchAndCacheShow(Integer id) {
